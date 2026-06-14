@@ -12969,7 +12969,7 @@ const medalData = [
              * 转换为收益浮点数 HTML 标签，并找出最大收益等级
              */
             LevelsFloat: (levelsObj, type = "replay") => {
-                let BeatLv = { value: 0, level: "1" };
+                let BeatLv = { value: -Infinity, level: "1" };
                 let MaxLv = 0;
 
                 const map = {};
@@ -13008,6 +13008,9 @@ const medalData = [
 
                     const totalEmoji = ATTR_MAP?.['总计']?.emoji || '';
                     map[k] = `<span class="medal-floats item">${itemsHtml}</span><span class="medal-floats total">${totalEmoji}${totalFixed}</span>`;
+                }
+                if (BeatLv.value === -Infinity) {
+                    BeatLv.value = "0.00";
                 }
 
                 return { map, BeatLv, MaxLv };
@@ -13748,9 +13751,9 @@ const medalData = [
 
         generateTemplate(item) {
             const noText = item?.no ? `<span style="font-size:18px">No.</span><span class="medal-no">${item.no}</span >` : '';
-            const typeText = item?.type ? `<span class="medal-type"> ${item.type}</span>` : '';
-            const nameText = item?.name ? `<span class="medal-name"> ${item.name}</span>` : '';
-
+            const typeText = item?.type ? `<span class="medal-type">${item.type}</span>` : '';
+            const nameText = item?.name ? `<span class="medal-name">${item.name}</span>` : '';
+            const backstoryText = item?.backstory ? `<span class="medal-backstory">【背景故事】${item.backstory}</span>` : ''
             const tidText = (item?.date && item?.url_tid)
                 ? `<span class="medal-create">【创建时间】<a href="/thread-${item.url_tid}-1-1.html" target="_blank">${item.date}（前往博物馆）</a></span>`
                 : (item?.date ? `<span class="medal-create">【创建时间】${item.date}</span>` : '');
@@ -13760,80 +13763,69 @@ const medalData = [
             // 处理item.levels内容，加上img和回帖概率以小数显示
             const levelsALLHTML = this.convertFunc.AllToHTML(item?.levels, (this.showImg ? item?.levels_img_local : ''), item?.price)
 
-            return `<div class="medal-header"><div class="medal-title">${noText}${nameText}<span style="flex-grow:1"></span>${typeText}</div>${tidText}${buyLimitText}${priceText}${durationText}</div> ${levelsALLHTML}`;
+            return `<div class="medal-header"><div class="medal-title">${noText}${nameText}<span style="flex-grow:1"></span>${typeText}</div>${tidText}${backstoryText}${buyLimitText}${priceText}${durationText}</div> ${levelsALLHTML}`;
         }
 
+        // 后台下载图片，完成后缓存
+        async _backgroundDownloadAndCache(src) {
+            try {
+                const saveResult = await this.localFile.saveFile(src);
+                if (saveResult?.blobData) {
+                    const newUrl = URL.createObjectURL(saveResult.blobData);
+                    this.localFile.cache.add(saveResult.fileName, newUrl);
+                }
+            } catch (err) {
+                if (err.name === 'NotAllowedError') console.error("写入本地权限丢失");
+                if (err.name === 'NotFoundError') console.error("无法找到文件夹，请确认文件夹是否移动或者重命名！");
+            }
+        }
+        // 获取本地图片，有返回blob，没有直接返回原src（开启后台下载图片）
         async getLocalImg(imgsObj) {
             if (!imgsObj) return {};
-
             if (!this.getShowImgStatus()) return {};
 
+            // 如果未开启本地图片功能，直接返回原网络数据
             if (!this.getLocalImgStatus()) return imgsObj;
 
+            // 校验授权，失败直接返回原图
             if (!(await this.localFile.verify())) {
                 console.warn("未获得本地文件系统授权，跳过存储");
                 return imgsObj;
             }
 
-            // 将对象转为数组进行并行处理
             const entries = Object.entries(imgsObj);
+            const downloadLock = new Map(); // 用于多张图指向同一 src 时，防止重复触发后台下载
 
-            const downloadLock = new Map(); // 不同的等级图片为同一个 src，只需要下载一次
-
-            // limit 限制并发数量
             const processedEntries = await Promise.all(
                 entries.map(([key, [src, width]]) =>
                     limit(async () => {
                         if (!src) return [key, ["", width]];
-                        if (downloadLock.has(src)) {
-                            const lockedUrl = await downloadLock.get(src);
-                            return [key, [lockedUrl, width]];
-                        }
-                        const task = (async () => {
-                            try {
-                                // 检查缓存和本地文件
-                                let localSrc = await this.localFile.getFile(src);
-                                if (localSrc) return localSrc;
-                                throw { name: 'NotFoundError' };
-                            } catch (err) {
-                                if (err.name === 'NotFoundError') {
-                                    try {
-                                        const saveResult = await this.localFile.saveFile(src);
 
-                                        if (saveResult?.blobData) {
-                                            const newUrl = URL.createObjectURL(saveResult.blobData);
-                                            this.localFile.cache.add(saveResult.fileName, newUrl);
-                                            return newUrl;
-                                        }
-                                        console.error(`处理图片失败: ${src}`, saveResult);
-                                        return src;
-                                    } catch (err) {
-                                        if (err.name === 'NotAllowedError') {
-                                            console.error("写入本地权限丢失");
-
-                                        } if (err.name === 'NotFoundError') {
-                                            console.error("无法找到文件夹，请确认文件夹是否移动或者重命名！");
-                                        }
-                                        return src;
-                                    }
-
-                                } else if (err.name === 'NotAllowedError') {
-                                    console.error("获取本地文件权限丢失");
-                                }
-                                console.error(`处理图片失败: ${src}`, err);
-                                return src;
+                        try {
+                            // 尝试读取本地缓存/本地文件
+                            let localSrc = await this.localFile.getFile(src);
+                            if (localSrc) {
+                                // 本地有，直接返回 Blob URL
+                                return [key, [localSrc, width]];
                             }
-                        })();
+                        } catch (err) {
+                            if (err.name === 'NotAllowedError') console.error("获取本地文件权限丢失");
+                        }
 
-                        // 将该 URL 的处理过程加入锁
-                        downloadLock.set(src, task);
+                        // 本地没有缓存，不等待下载，直接准备返回原网络 src
+                        // 为了防止并行的请求同时去下载同一个 src，用 lock 锁一下后台任务
+                        if (!downloadLock.has(src)) {
+                            // 触发后台下载
+                            const bgTask = this._backgroundDownloadAndCache(src);
+                            downloadLock.set(src, bgTask);
+                        }
 
-                        const finalUrl = await task;
-                        return [key, [finalUrl, width]];
-
+                        // 立刻返回原网络 src，混合加载，不阻塞渲染
+                        return [key, [src, width]];
                     })
                 )
             );
+
             downloadLock.clear();
             return Object.fromEntries(processedEntries);
         }

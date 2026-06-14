@@ -383,7 +383,8 @@
             const variants = [
                 baseAlt.replace(/·/g, '‧'),   // 全角转半角点
                 baseAlt.replace(/‧/g, '·'),    // 半角点转全角
-                baseAlt.replace('/:/g', '：'),
+                baseAlt.replace('/:/g', '：'), // 预防全角半角冒号
+                baseAlt.replace('/：/g', ':'),
             ]
 
             // 处理可能存在的结尾标点（例如真人男从的. 以及其他各种特殊符号，总之去掉末尾的.是对的）
