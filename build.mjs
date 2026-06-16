@@ -9,6 +9,8 @@ const __dirname = path.dirname(__filename);
 const DATA_DIR = path.join(__dirname, "data");
 const JSON_DIR = path.join(__dirname, "json");
 
+const PARENT_DIR = path.join(__dirname, "..");
+
 if (!fs.existsSync(JSON_DIR)) fs.mkdirSync(JSON_DIR, { recursive: true });
 
 function loadMedalFile(filePath) {

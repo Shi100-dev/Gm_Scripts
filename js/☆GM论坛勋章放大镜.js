@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         勋章放大镜
 // @namespace    http://tampermonkey.net/
-// @version      2.7.26
+// @version      2.7.28
 // @description  泥潭勋章属性展示！
 // @author       轶致
 // @match        https://www.gamemale.com/wodexunzhang-showxunzhang.html*
@@ -383,7 +383,7 @@
             const variants = [
                 baseAlt.replace(/·/g, '‧'),   // 全角转半角点
                 baseAlt.replace(/‧/g, '·'),    // 半角点转全角
-                baseAlt.replace('/:/g', '：'), // 预防全角半角冒号
+                baseAlt.replace('/:/g', '：'), // 全角半角冒号
                 baseAlt.replace('/：/g', ':'),
             ]
 
@@ -396,7 +396,8 @@
 
             // 判断是否需要显示图片内容
             let showText = 放大镜内容映射表[altKey];
-            if (showImg && showText) {
+            if (showImg && showText)
+            {
                 showText = addImgUrl(showText);
             }
 
@@ -478,38 +479,48 @@
         // debugger;
         let textLines = text.split('\n');
         let name = textLines[0];
-        if (!(name in imgs)) {
+        if (!(name in imgs))
+        {
             console.log(name + ' img not fonud or same');
             return text;
         }
 
         let max_width = 0;
-        for (let key in imgs[name]) {
+        for (let key in imgs[name])
+        {
             max_width = (imgs[name][key][1] > max_width) ? imgs[name][key][1] : max_width;
-            if (124 == max_width) {
+            if (124 == max_width)
+            {
                 break;
             }
         }
 
         // console.log(name + ' max width '+max_width);
 
-        for (let i = 1; i < textLines.length; i++) {
+        for(let i = 1; i < textLines.length; i++)
+        {
             let lv = textLines[i].match(/【等级(\d+)】/)?.[1];
-            if (lv) {
+            if (lv)
+            {
                 lv = lv.toString();
             }
-            else if (textLines[i].includes('【 Max 】')) {
+            else if (textLines[i].includes('【 Max 】'))
+            {
                 lv = 'Max';
             }
-            else if (textLines[i].includes('【等级 初级】')) {
+            else if (textLines[i].includes('【等级 初级】'))
+            {
                 lv = '初级';
             }
-            else {
+            else
+            {
                 continue;
             }
-            if (lv in imgs[name]) {
+            if (lv in imgs[name])
+            {
                 let addStr = `<img src="${imgs[name][lv][0]}" width="${imgs[name][lv][1]}px" align="middle">`;
-                if (imgs[name][lv][1] < max_width) {
+                if (imgs[name][lv][1] < max_width)
+                {
                     addStr = addStr + `<img width="${max_width - imgs[name][lv][1]}px" align="middle">`;
                 }
                 textLines[i] = addStr + textLines[i];

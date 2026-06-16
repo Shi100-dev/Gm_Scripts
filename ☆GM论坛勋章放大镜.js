@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         勋章放大镜
 // @namespace    http://tampermonkey.net/
-// @version      2.7.26
+// @version      2.7.28
 // @description  泥潭勋章属性展示！
 // @author       轶致
 // @match        https://www.gamemale.com/wodexunzhang-showxunzhang.html*
@@ -383,7 +383,7 @@
             const variants = [
                 baseAlt.replace(/·/g, '‧'),   // 全角转半角点
                 baseAlt.replace(/‧/g, '·'),    // 半角点转全角
-                baseAlt.replace('/:/g', '：'), // 预防全角半角冒号
+                baseAlt.replace('/:/g', '：'), // 全角半角冒号
                 baseAlt.replace('/：/g', ':'),
             ]
 
@@ -396,7 +396,8 @@
 
             // 判断是否需要显示图片内容
             let showText = 放大镜内容映射表[altKey];
-            if (showImg && showText) {
+            if (showImg && showText)
+            {
                 showText = addImgUrl(showText);
             }
 
@@ -478,38 +479,48 @@
         // debugger;
         let textLines = text.split('\n');
         let name = textLines[0];
-        if (!(name in imgs)) {
+        if (!(name in imgs))
+        {
             console.log(name + ' img not fonud or same');
             return text;
         }
 
         let max_width = 0;
-        for (let key in imgs[name]) {
+        for (let key in imgs[name])
+        {
             max_width = (imgs[name][key][1] > max_width) ? imgs[name][key][1] : max_width;
-            if (124 == max_width) {
+            if (124 == max_width)
+            {
                 break;
             }
         }
 
         // console.log(name + ' max width '+max_width);
 
-        for (let i = 1; i < textLines.length; i++) {
+        for(let i = 1; i < textLines.length; i++)
+        {
             let lv = textLines[i].match(/【等级(\d+)】/)?.[1];
-            if (lv) {
+            if (lv)
+            {
                 lv = lv.toString();
             }
-            else if (textLines[i].includes('【 Max 】')) {
+            else if (textLines[i].includes('【 Max 】'))
+            {
                 lv = 'Max';
             }
-            else if (textLines[i].includes('【等级 初级】')) {
+            else if (textLines[i].includes('【等级 初级】'))
+            {
                 lv = '初级';
             }
-            else {
+            else
+            {
                 continue;
             }
-            if (lv in imgs[name]) {
+            if (lv in imgs[name])
+            {
                 let addStr = `<img src="${imgs[name][lv][0]}" width="${imgs[name][lv][1]}px" align="middle">`;
-                if (imgs[name][lv][1] < max_width) {
+                if (imgs[name][lv][1] < max_width)
+                {
                     addStr = addStr + `<img width="${max_width - imgs[name][lv][1]}px" align="middle">`;
                 }
                 textLines[i] = addStr + textLines[i];
@@ -585,7 +596,8 @@ var 放大镜内容映射表 = {
     "『转生经筒』": "『转生经筒』\n【勋章类型】剧情\n【创建时间】2023-1-4\n【入手条件】签到天数≥1460，灵魂≥1（限时活动）\n【商店售价】1旅程\n【 Max 】无属性",
     "『绿茵甘露』": "『绿茵甘露』\n【勋章类型】剧情\n【创建时间】2023-6-22\n【入手条件】主题数≥1（【派遣远征s1】活动）\n【商店售价】1金币\n【持续时间】14天\n【 Max 】无属性",
     "GM马年红包": "GM马年红包\n【勋章类型】赠礼\n【创建时间】2026-2-16\n【入手条件】2026春节期间，只可赠送\n【商店售价】1金币\n【持续时间】15天\n【等级1】无属性▕▏升级条件：消耗-1金币\n【 Max 】1% 回帖金币+1",
-    "霉运小精灵[红]": "霉运小精灵[红]\n【勋章类型】奖品\n【创建时间】<a href=\"/thread-188278-1-1.html\" target=\"_blank\">2026-6-10（前往博物馆）</a>\n【入手条件】限定活动安慰奖（听说收集三只能够兑换不得了的奖励）\n【商店售价】0金币\n【 Max 】1% 回帖血液-1、发帖灵魂+1",
+    "雾港捞月": "雾港捞月\n【勋章类型】奖品\n【创建时间】2026-6-16\n【入手条件】【十三周年】活动发表主题帖奖励\n【 Max 】13% 回帖血液+1",
+    "霉运小精灵[红]": "霉运小精灵[红]\n【勋章类型】奖品\n【创建时间】<a href=\"/thread-188278-1-1.html\" target=\"_blank\">2026-6-10（前往博物馆）</a>\n【入手条件】限定活动安慰奖（听说收集三只能够兑换不得了的奖励）\n【 Max 】1% 回帖血液-1、发帖灵魂+1",
     "游侠职业证书": "游侠职业证书\n【勋章类型】职业\n【创建时间】<a href=\"/thread-187542-1-1.html\" target=\"_blank\">2026-6-9（前往博物馆）</a>\n【入手条件】等级=Lv10，灵魂≥3，金币≥5000，旅程≥500\n【商店售价】999金币\n【等级1】10% 发帖金币+1▕▏升级条件：知识≥500\n【等级2】15% 发帖金币+1▕▏升级条件：总积分≥1500\n【等级3】20% 发帖金币+1▕▏升级条件：知识≥1500\n【 Max 】25% 发帖金币+1",
     "法师职业证书": "法师职业证书\n【勋章类型】职业\n【创建时间】<a href=\"/thread-187541-1-1.html\" target=\"_blank\">2026-6-9（前往博物馆）</a>\n【入手条件】等级=Lv10，灵魂≥3，咒术≥1000，旅程≥500\n【商店售价】999金币\n【等级1】10% 发帖咒术+1▕▏升级条件：知识≥500\n【等级2】15% 发帖咒术+1▕▏升级条件：总积分≥1500\n【等级3】20% 发帖咒术+1▕▏升级条件：知识≥1500\n【 Max 】25% 发帖咒术+1",
     "战士职业证书": "战士职业证书\n【勋章类型】职业\n【创建时间】<a href=\"/thread-187538-1-1.html\" target=\"_blank\">2026-6-9（前往博物馆）</a>\n【入手条件】等级=Lv10，灵魂≥3，血液≥5000，旅程≥500\n【商店售价】999金币\n【等级1】10% 发帖血液+1▕▏升级条件：知识≥500\n【等级2】15% 发帖血液+1▕▏升级条件：总积分≥1500\n【等级3】20% 发帖血液+1▕▏升级条件：知识≥1500\n【 Max 】25% 发帖血液+1",
@@ -1243,7 +1255,7 @@ var 放大镜内容映射表 = {
     "灵光补脑剂": "灵光补脑剂\n【勋章类型】赠礼\n【创建时间】<a href=\"/thread-12051-1-1.html\" target=\"_blank\">2015-4-25（前往博物馆）</a>\n【入手条件】只可赠送\n【商店售价】22金币\n【持续时间】3天\n【等级1】升级条件：消耗-1知识\n【 Max 】2% 回帖血液-1",
     "千杯不醉": "千杯不醉\n【勋章类型】赠礼\n【创建时间】<a href=\"/thread-12050-1-1.html\" target=\"_blank\">2015-4-25（前往博物馆）</a>\n【入手条件】只可赠送\n【商店售价】12金币\n【持续时间】5天\n【 Max 】5% 回帖血液+1 堕落+1、发帖血液+1 堕落+1",
     "丢肥皂": "丢肥皂\n【勋章类型】赠礼\n【创建时间】<a href=\"/thread-12049-1-1.html\" target=\"_blank\">2015-4-25（前往博物馆）</a>\n【入手条件】只可赠送\n【商店售价】10金币\n【持续时间】5天\n【 Max 】10% 回帖堕落+1、发帖堕落+1",
-    "送情书": "送情书\n【勋章类型】赠礼\n【创建时间】<a href=\"/thread-12048-1-1.html\" target=\"_blank\">2015-4-25（前往博物馆）</a>\n【入手条件】只可赠送\n【商店售价】15金币\n【持续时间】5天\n【 Max 】10% 回帖咒术+1、发帖咒术+1",
+    "送情书": "送情书\n【勋章类型】赠礼\n【创建时间】<a href=\"/thread-12048-1-1.html\" target=\"_blank\">2015-4-25（前往博物馆）</a>\n【入手条件】只可赠送\n【商店售价】18金币\n【持续时间】5天\n【 Max 】10% 回帖咒术+1、发帖咒术+1",
     "奥利弗‧奎恩": "奥利弗‧奎恩\n【勋章类型】真人男从\n【创建时间】<a href=\"/thread-12047-1-1.html\" target=\"_blank\">2015-4-25（前往博物馆）</a>\n【入手条件】堕落<50\n【商店售价】680金币\n【等级1】5% 发帖血液+2▕▏升级条件：消耗40血液\n【等级2】7% 发帖血液+2▕▏升级条件：消耗65血液\n【等级3】9% 发帖血液+2▕▏升级条件：主题数≥15\n【等级4】11% 回帖血液+1、发帖血液+2▕▏升级条件：追随≥45\n【等级5】13% 回帖血液+1、发帖血液+2▕▏升级条件：消耗30堕落\n【等级6】13% 回帖血液+1、发帖血液+2▕▏升级条件：消耗500血液\n【 Max 】15% 回帖血液+1 堕落-1、发帖血液+2 堕落-3",
     "肥皂": "肥皂\n【勋章类型】游戏男从\n【创建时间】<a href=\"/thread-12046-1-1.html\" target=\"_blank\">2015-4-25（前往博物馆）</a>\n【入手条件】无\n【商店售价】400金币\n【等级1】无属性▕▏升级条件：消耗60金币\n【等级2】3% 回帖金币+1、发帖金币+5▕▏升级条件：消耗150金币\n【等级3】7% 回帖金币+1、发帖金币+5▕▏升级条件：追随≥50\n【等级4】10% 回帖金币+1、发帖金币+5▕▏升级条件：追随≥80\n【等级5】12% 回帖金币+1、发帖金币+5▕▏升级条件：消耗-200金币\n【 Max 】12% 回帖金币+2、发帖金币+5 旅程+1",
     "凯登‧阿兰科": "凯登‧阿兰科\n【勋章类型】游戏男从\n【创建时间】<a href=\"/thread-12045-1-1.html\" target=\"_blank\">2015-4-25（前往博物馆）</a>\n【入手条件】无\n【商店售价】550金币\n【等级1】5% 回帖金币+1▕▏升级条件：消耗20血液\n【等级2】5% 回帖金币+1 血液+1▕▏升级条件：血液≥60\n【等级3】7% 回帖金币+1 血液+1▕▏升级条件：消耗150金币\n【等级4】10% 回帖金币+1 血液+1、发帖金币+1 血液+1▕▏升级条件：灵魂≥1\n【等级5】20% 回帖金币+1 血液+1、发帖金币+1 血液+1▕▏升级条件：消耗800金币\n【 Max 】50% 回帖金币+1 血液+1、发帖金币+3 血液+3",
@@ -1499,6 +1511,12 @@ var imgs = {
         "Max": [
             "https://img.gamemale.com/album/202602/15/020714sz61kt1xv7x14l1l.gif",
             40
+        ]
+    },
+    "雾港捞月": {
+        "Max": [
+            "https://img.gamemale.com/album/202606/08/205214ym4vh6654mrnl6vn.gif",
+            124
         ]
     },
     "霉运小精灵[红]": {

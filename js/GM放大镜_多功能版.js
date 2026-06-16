@@ -2037,7 +2037,7 @@ function pLimit(concurrency) {
                         const [src, width] = imgsObj[key];
 
                         result[key] = src
-                            ? `<div class="level-img"><img src="${src}" width="${width}" loading="lazy"></div>`
+                            ? `<div class="level-img"><img src="${src}" width="${width}" style="height: 43px; object-fit: contain;" loading="lazy"></div>`
                             : `<div class="level-img none">${SVG?.["缺图"] || ''}</div>`;
                     }
                 }
@@ -2168,7 +2168,14 @@ function pLimit(concurrency) {
          * @returns {string} 返回 Blob URL
          */
         get(fileName) {
-            return this.cache.get(fileName);
+            if (!this.cache.has(fileName)) return undefined;
+
+            const url = this.cache.get(fileName);
+
+            this.cache.delete(fileName);
+            this.cache.set(fileName, url);
+
+            return url;
         }
     }
 
@@ -2190,6 +2197,7 @@ function pLimit(concurrency) {
             this.isProcessing = false;
             this.idb = idbstorage;
             this.curPermission = null;
+            this.readLock = new Map(); // 用来缓存正在读取磁盘的 Promise
         }
         async #saveHandle(handle) {
             try {
@@ -2378,16 +2386,33 @@ function pLimit(concurrency) {
 
             const fileName = this.utilFunc.getFileNameFromUrl(url);
             const existingUrl = this.cache.get(fileName);
+
             if (existingUrl) return existingUrl;
 
-            const fileHandle = await this.dirHandle.getFileHandle(fileName);
-            const file = await fileHandle.getFile();
-            const newUrl = URL.createObjectURL(file);
+            // 直接返回正在读取的那个 Promise，大家一起等它完工
+            if (this.readLock.has(fileName)) return this.readLock.get(fileName);
 
-            this.cache.add(fileName, newUrl);
+            const readTask = (async () => {
+                try {
+                    const fileHandle = await this.dirHandle.getFileHandle(fileName);
+                    const file = await fileHandle.getFile();
+                    const newUrl = URL.createObjectURL(file);
 
-            return newUrl;
+                    // 成功后，写入 LRU 缓存
+                    this.cache.add(fileName, newUrl);
+                    return newUrl;
+                } catch (error) {
+                    console.error("失败",error)
+                } finally {
+                    // 无论是成功还是失败，任务结束了就从锁里移除
+                    this.readLock.delete(fileName);
+                }
+            })();
 
+            // 将这个正在执行的 Promise 锁住
+            this.readLock.set(fileName, readTask);
+
+            return readTask;
         }
     }
     const GLOBAL_THEME = `
@@ -2456,7 +2481,8 @@ function pLimit(concurrency) {
             this.nodeCache = new WeakMap();
             // 转换 this.medalData 为 以name为键的Map
             this.medalMap = null;
-
+            // 全局下载锁
+            this.globalDownloadLock = new Map();
 
             // 初始化
             this.initDB();
@@ -2778,7 +2804,6 @@ function pLimit(concurrency) {
             }
 
             const entries = Object.entries(imgsObj);
-            const downloadLock = new Map(); // 用于多张图指向同一 src 时，防止重复触发后台下载
 
             const processedEntries = await Promise.all(
                 entries.map(([key, [src, width]]) =>
@@ -2798,10 +2823,13 @@ function pLimit(concurrency) {
 
                         // 本地没有缓存，不等待下载，直接准备返回原网络 src
                         // 为了防止并行的请求同时去下载同一个 src，用 lock 锁一下后台任务
-                        if (!downloadLock.has(src)) {
+                        if (!this.globalDownloadLock.has(src)) {
                             // 触发后台下载
-                            const bgTask = this._backgroundDownloadAndCache(src);
-                            downloadLock.set(src, bgTask);
+                            const bgTask = this._backgroundDownloadAndCache(src).finally(() => {
+                                // 下载任务完成后，记得从全局锁中移除，允许以后可能重新下载
+                                this.globalDownloadLock.delete(src);
+                            });
+                            this.globalDownloadLock.set(src, bgTask);
                         }
 
                         // 立刻返回原网络 src，混合加载，不阻塞渲染
@@ -2810,7 +2838,6 @@ function pLimit(concurrency) {
                 )
             );
 
-            downloadLock.clear();
             return Object.fromEntries(processedEntries);
         }
         /**
@@ -2986,13 +3013,19 @@ function pLimit(concurrency) {
 
                     const labelRect = label.getBoundingClientRect();
                     const viewportHeight = window.innerHeight;
+                    const viewportWidth = window.innerWidth;   // 视口宽度
 
                     let left = labelRect.left - w - 1;
+                    let rightAvailableWidth = viewportWidth - labelRect.left - labelRect.width - w - 1
+
                     if (left < 0) {
-                        left = 2;
-                        this.el.style.width = labelRect.left - 4 + "px";
-                        // 重新获取放大镜的高度(包含滚动条)
-                        h = this.el.offsetHeight
+                        if (rightAvailableWidth > 0) left = labelRect.left + labelRect.width
+                        else {
+                            left = 2;
+                            this.el.style.width = labelRect.left - 4 + "px";
+                            // 重新获取放大镜的高度(包含滚动条)
+                            h = this.el.offsetHeight
+                        }
                     }
                     // 对齐 .MyshowTip2 顶部
                     let top = labelRect.top;

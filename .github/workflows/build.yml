@@ -31,7 +31,7 @@ jobs:
         run: node build.mjs
 
       - name: Commit and Push changes
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "auto-generated files from build [skip ci]"
           file_pattern: "json/* ☆GM论坛勋章放大镜.js ☆GM放大镜_多功能版.js"

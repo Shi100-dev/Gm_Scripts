@@ -1,12 +1,25 @@
 const medalData = [
     {
         "type": "奖品",
+        "no": "0684",
+        "url_tid": "",
+        "name": "雾港捞月",
+        "date": "2026-6-16",
+        "buy_limit": "【十三周年】活动发表主题帖奖励",
+        "price": "无",
+        "levels": "【 Max 】13% 回帖血液+1",
+        "levels_img": {
+            "Max": ["https://img.gamemale.com/album/202606/08/205214ym4vh6654mrnl6vn.gif", 124]
+        }
+    },
+    {
+        "type": "奖品",
         "no": "0683",
         "url_tid": "188278",
         "name": "霉运小精灵[红]",
         "date": "2026-6-10",
         "buy_limit": "限定活动安慰奖（听说收集三只能够兑换不得了的奖励）",
-        "price": "0金币",
+        "price": "无",
         "levels": "【 Max 】1% 回帖血液-1、发帖灵魂+1",
         "levels_img": {
             "Max": ["https://img.gamemale.com/album/202606/09/023747o34vdyv28myyoxmo.gif", 40]
@@ -10364,7 +10377,7 @@ const medalData = [
         "name": "送情书",
         "date": "2015-4-25",
         "buy_limit": "只可赠送",
-        "price": "15金币",
+        "price": "18金币",
         "duration": "5天",
         "levels": "【 Max 】10% 回帖咒术+1、发帖咒术+1",
         "levels_img": {
