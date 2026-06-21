@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GM-勋章放大镜
 // @namespace    https://docs.scriptcat.org/
-// @version      2.2.4
+// @version      2.2.5
 // @description  暗黑模式的勋章放大镜
 // @author       1:轶致2:咸鱼鱼3:哈哈哈哈_
 // @match        *://*.gamemale.com/*
