@@ -3069,7 +3069,7 @@ function pLimit(concurrency) {
 
             // 垂直边界判断
             if (top < 10) {
-                top = rect.bottom + 10;
+                top = rect.top;
             }
 
             // 显示在下方还超出了窗口底部，强制贴合在底部（保留10px间距）

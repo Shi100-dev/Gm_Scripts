@@ -440,6 +440,34 @@ const medalDataNoTid = [
 const medalData = [
     {
         "type": "奖品",
+        "no": "0686",
+        "url_tid": "190672",
+        "name": "粉色大厨",
+        "date": "2026-7-3",
+        "buy_limit": "【Magic Sweet】植物与食物活动获得积分第一",
+        "price": "无",
+        "levels": "【等级1】1% 回帖血液+1▕▏升级条件：消耗100血液\n【等级2】1% 回帖咒术+1▕▏升级条件：消耗100血液\n【 Max 】1% 回帖咒术+2",
+        "levels_img": {
+            "1": ["https://img.gamemale.com/album/202607/01/121146ugewizdgei7vpe0w.gif", 40],
+            "2": ["https://img.gamemale.com/album/202607/01/121146hv82iwfhwhrvppir.gif", 40],
+            "Max": ["https://img.gamemale.com/album/202607/01/121146i888vkgzzbq8l08h.gif", 40]
+        }
+    },
+    {
+        "type": "奖品",
+        "no": "0685",
+        "url_tid": "190671",
+        "name": "超能留声机",
+        "date": "2026-7-3",
+        "buy_limit": "【Magic Sweet】植物与食物活动生存获得",
+        "price": "无",
+        "levels": "【 Max 】1% 回帖金币+1",
+        "levels_img": {
+            "Max": ["https://img.gamemale.com/album/202607/01/121145slf7aedod76l8jto.gif", 40]
+        }
+    },
+    {
+        "type": "奖品",
         "no": "0684",
         "url_tid": "189527",
         "name": "雾港捞月",
@@ -635,10 +663,10 @@ const medalData = [
         "date": "2026-6-9",
         "buy_limit": "无",
         "price": "300金币",
-        "levels": "【等级1】1% 回帖咒术+2▕▏升级条件：消耗200血液\n【等级2】勋章博物馆资料暂缺\n【 Max 】3% 回帖咒术+2",
+        "levels": "【等级1】1% 回帖咒术+2▕▏升级条件：消耗200血液\n【等级2】4% 回帖咒术+2 堕落+2▕▏升级条件：堕落≥20\n【 Max 】3% 回帖咒术+2",
         "levels_img": {
             "1": ["https://img.gamemale.com/album/202606/07/152430g74xv0etd74ddvda.gif", 40],
-            "2": ["", 40],
+            "2": ["https://img.gamemale.com/album/202606/07/152431niaxpd7oi47gppz2.gif", 40],
             "Max": ["https://img.gamemale.com/album/202606/07/152432wmb2xaxk55saz2n2.gif", 40]
         }
     },
@@ -4558,7 +4586,7 @@ const medalData = [
         "price": "600金币",
         "levels": "【等级1】4% 回帖血液+1 堕落+1▕▏升级条件：消耗150金币\n【等级2】6% 回帖血液+2 堕落+1▕▏升级条件：堕落≥120\n【等级3】8% 回帖血液+2 堕落+1▕▏升级条件：消耗150金币\n【等级4】10% 回帖血液+2 堕落+1▕▏升级条件：消耗-1旅程\n【等级5】11% 回帖血液+2 堕落+1▕▏升级条件：血液≥666\n【 Max 】12% 回帖血液+3 金币-1、发帖旅程+1",
         "levels_img": {
-            "1": ["https://img.gamemale.com/album/202304/30/170233kyygo7849z4goy73.gif", 82],
+            "1": ["https://img.gamemale.com/album/202304/30/170233kyygo7849z4goy73.gif", 40],
             "2": ["https://img.gamemale.com/album/202304/30/170234q338jm2ow9k2v24t.gif", 82],
             "3": ["", 82],
             "4": ["https://img.gamemale.com/album/202305/01/151527c2qaqzqlm4x2l802.gif", 82],
@@ -14098,7 +14126,7 @@ const medalData = [
 
             // 垂直边界判断
             if (top < 10) {
-                top = rect.bottom + 10;
+                top = rect.top;
             }
 
             // 显示在下方还超出了窗口底部，强制贴合在底部（保留10px间距）
